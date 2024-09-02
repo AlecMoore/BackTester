@@ -28,10 +28,14 @@ var builder = Host.CreateDefaultBuilder(args)
             return new KlineDataRepository(connectionString ?? "");
         });
         services.AddScoped<KlineDataService>();
+        services.AddScoped<FeeDataService>();
     })
     .Build();
 
-var host = builder.Services.GetRequiredService<KlineDataService>();
+// Retrieve the KlineDataService and FeeDataService from the service provider
+var klineService = builder.Services.GetRequiredService<KlineDataService>();
+var feeService = builder.Services.GetRequiredService<FeeDataService>();
 
-//Add ETH Klines to DB
-await host.SyncKlineDataAsync("ETHUSDT", "Binance");
+// Add ETH Klines to DB
+//await klineService.SyncKlineDataAsync("ETHUSDT", "Binance");
+await feeService.GetFeeDataAsync("ETHUSDT", "Binance");

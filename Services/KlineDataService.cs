@@ -1,5 +1,7 @@
 ﻿using Binance.Net.Enums;
 using CryptoClients.Net.Interfaces;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using TradingBots.Extensions;
 using TradingBots.Interfaces;
 using TradingBots.Models;
@@ -45,24 +47,10 @@ namespace TradingBots.Services
                     {
                         foreach (var kline in binanceKlines.Result.Data)
                         {
-                            KlineData klineData = new KlineData()
-                            {
-                                ClosePrice = kline.ClosePrice,
-                                CloseTime = kline.CloseTime,
-                                HighPrice = kline.HighPrice,
-                                LowPrice = kline.LowPrice,
-                                OpenPrice = kline.OpenPrice,
-                                OpenTime = kline.OpenTime,
-                                QuoteVolume = kline.QuoteVolume,
-                                TakerBuyBaseVolume = kline.TakerBuyBaseVolume,
-                                TakerBuyQuoteVolume = kline.TakerBuyQuoteVolume,
-                                TradeCount = kline.TradeCount,
-                                Volume = kline.Volume,
-                                Pair = pair,
-                                Exchange = exchange,
-                            };
+                            var klineData = KlineData.FromBinanceInterface(kline, pair, exchange);
 
-                            if (!databaseKlines.Contains(klineData))
+                            //Checks kline is not already in db
+                            if (!databaseKlines.Any(k => k.CloseTime == klineData.CloseTime))
                             {
                                 _klineDataRepository.AddKlineData(klineData);
                             }
