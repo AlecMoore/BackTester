@@ -1,14 +1,29 @@
-﻿using CryptoExchange.Net.CommonObjects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TradingBots.Models
+﻿
+namespace BackTester.Models
 {
-    public class KlineData
+    public class KlineData : DataBaseObject
     {
+        public KlineData(int id, decimal closePrice, DateTime closeTime, decimal highPrice, decimal lowPrice, 
+            decimal openPrice, DateTime openTime, decimal quoteVolume, decimal takerBuyBaseVolume, 
+            decimal takerBuyQuoteVolume, int tradeCount, decimal volume, ExchangeEnum exchange, string pair, DateTime createDate)
+        {
+            Id = id;
+            ClosePrice = closePrice;
+            CloseTime = closeTime;
+            HighPrice = highPrice;
+            LowPrice = lowPrice;
+            OpenPrice = openPrice;
+            OpenTime = openTime;
+            QuoteVolume = quoteVolume;
+            TakerBuyBaseVolume = takerBuyBaseVolume;
+            TakerBuyQuoteVolume = takerBuyQuoteVolume;
+            TradeCount = tradeCount;
+            Volume = volume;
+            Exchange = exchange;
+            Pair = pair;
+            CreateDate = createDate;
+        }
+
         public int Id { get; set; }
         public decimal ClosePrice { get; set; }
         public DateTime CloseTime { get; set; }
@@ -21,30 +36,5 @@ namespace TradingBots.Models
         public decimal TakerBuyQuoteVolume { get; set; }
         public int TradeCount { get; set; }
         public decimal Volume { get; set; }
-        public string? Pair { get; set; }
-        public string? Exchange { get; set; }
-        public DateTime CreateDate { get; set; }
-
-        //Factory Methods
-        public static KlineData FromBinanceInterface(Binance.Net.Interfaces.IBinanceKline kline, string pair, string exchange)
-        {
-            return new KlineData
-            {
-                ClosePrice = kline.ClosePrice,
-                CloseTime = kline.CloseTime,
-                HighPrice = kline.HighPrice,
-                LowPrice = kline.LowPrice,
-                OpenPrice = kline.OpenPrice,
-                OpenTime = kline.OpenTime,
-                QuoteVolume = kline.QuoteVolume,
-                TakerBuyBaseVolume = kline.TakerBuyBaseVolume,
-                TakerBuyQuoteVolume = kline.TakerBuyQuoteVolume,
-                TradeCount = kline.TradeCount,
-                Volume = kline.Volume,
-                Pair = pair,
-                Exchange = exchange,
-                CreateDate = DateTime.UtcNow
-            };
-        }
     }
 }

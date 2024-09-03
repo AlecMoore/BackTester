@@ -1,5 +1,5 @@
 ﻿
-namespace TradingBots.Extensions
+namespace BackTester.Extensions
 {
     internal static class DateTimeExtensionMethods
     {

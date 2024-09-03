@@ -3,9 +3,9 @@ using CryptoClients.Net.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using TradingBots.Interfaces;
-using TradingBots.Repositories;
-using TradingBots.Services;
+using BackTester.Interfaces;
+using BackTester.Repositories;
+using BackTester.Services;
 
 var builder = Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration((context, config) =>

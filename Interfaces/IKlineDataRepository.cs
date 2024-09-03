@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TradingBots.Models;
+using BackTester.Models;
 
-namespace TradingBots.Interfaces
+namespace BackTester.Interfaces
 {
     public interface IKlineDataRepository
     {

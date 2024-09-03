@@ -5,10 +5,10 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TradingBots.Interfaces;
-using TradingBots.Models;
+using BackTester.Interfaces;
+using BackTester.Models;
 
-namespace TradingBots.Repositories
+namespace BackTester.Repositories
 {
     public class KlineDataRepository : IKlineDataRepository
     {
@@ -71,23 +71,10 @@ namespace TradingBots.Repositories
                     {
                         while (reader.Read())
                         {
-                            klines.Add(new KlineData
-                            {
-                                Id = reader.GetInt32(0),
-                                ClosePrice = reader.GetDecimal(1),
-                                CloseTime = reader.GetDateTime(2),
-                                HighPrice = reader.GetDecimal(3),
-                                LowPrice = reader.GetDecimal(4),
-                                OpenPrice = reader.GetDecimal(5),
-                                OpenTime = reader.GetDateTime(6),
-                                QuoteVolume = reader.GetDecimal(7),
-                                TakerBuyBaseVolume = reader.GetDecimal(8),
-                                TakerBuyQuoteVolume = reader.GetDecimal(9),
-                                TradeCount = reader.GetInt32(10),
-                                Volume = reader.GetDecimal(11),
-                                Pair = reader.GetString(12),
-                                Exchange = reader.GetString(13)
-                            });
+                            klines.Add(new KlineData(reader.GetInt32(0), reader.GetDecimal(1), reader.GetDateTime(2), reader.GetDecimal(3),
+                                reader.GetDecimal(4), reader.GetDecimal(5), reader.GetDateTime(6), reader.GetDecimal(7), reader.GetDecimal(8),
+                                reader.GetDecimal(9), reader.GetInt32(10), reader.GetDecimal(11), (ExchangeEnum)reader.GetInt32(13), 
+                                reader.GetString(12), reader.GetDateTime(14)));
                         }
                     }
                 }

@@ -2,22 +2,24 @@
 using CryptoClients.Net.Interfaces;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using TradingBots.Extensions;
-using TradingBots.Interfaces;
-using TradingBots.Models;
+using BackTester.Extensions;
+using BackTester.Interfaces;
+using BackTester.Models;
+using BackTester.Exchanges;
 
-
-namespace TradingBots.Services
+namespace BackTester.Services
 {
     public class KlineDataService
     {
         private readonly IKlineDataRepository _klineDataRepository;
         private readonly IExchangeRestClient _exhangeRestClient;
+        private readonly IExchangeRepository _exchangeRepository;
 
-        public KlineDataService(IKlineDataRepository klineDataRepository, IExchangeRestClient exhangeRestClient)
+        public KlineDataService(IKlineDataRepository klineDataRepository, IExchangeRestClient exhangeRestClient, IExchangeRepository exchangeRepository)
         {
             _klineDataRepository = klineDataRepository;
             _exhangeRestClient = exhangeRestClient;
+            _exchangeRepository = exchangeRepository;
         }
 
         /// <summary>
@@ -27,7 +29,7 @@ namespace TradingBots.Services
         /// <param name="pair"></param>
         /// <param name="exchange"></param>
         /// <returns></returns>
-        public async Task SyncKlineDataAsync(string pair, string exchange)
+        public async Task SyncKlineDataAsync(string pair, IEnumerable<ExchangeEnum> exchanges)
         {
             int numberOfRuns = 20;
             while(numberOfRuns > 0) { 
@@ -47,7 +49,7 @@ namespace TradingBots.Services
                     {
                         foreach (var kline in binanceKlines.Result.Data)
                         {
-                            var klineData = KlineData.FromBinanceInterface(kline, pair, exchange);
+                            var klineData = new KlineData(0, kline.)
 
                             //Checks kline is not already in db
                             if (!databaseKlines.Any(k => k.CloseTime == klineData.CloseTime))

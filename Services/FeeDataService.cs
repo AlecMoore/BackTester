@@ -2,13 +2,13 @@
 using Binance.Net.Interfaces;
 using CryptoClients.Net.Interfaces;
 using System.Collections.Generic;
-using TradingBots.Extensions;
-using TradingBots.Interfaces;
-using TradingBots.Models;
-using TradingBots.Repositories;
+using BackTester.Extensions;
+using BackTester.Interfaces;
+using BackTester.Models;
+using BackTester.Repositories;
 
 
-namespace TradingBots.Services
+namespace BackTester.Services
 {
     public class FeeDataService
     {
@@ -36,7 +36,7 @@ namespace TradingBots.Services
                 {
                     foreach (var fee in binanceFees.Result.Data)
                     {
-                        var feeData = FeeData.FromBinanceInterface(fee, pair, exchange);
+                        var feeData = UserFees.FromBinanceInterface(fee, pair, exchange);
                         Console.WriteLine(feeData.ToString());
 
                     }
