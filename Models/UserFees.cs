@@ -1,16 +1,15 @@
-﻿
-using Bybit.Net.Objects.Models.V5;
+﻿using CryptoClients.Net.Enums;
 
 namespace BackTester.Models
 {
     public class UserFees : DataBaseObject
     {
-        public UserFees(decimal makerCommission, decimal takerCommission, ExchangeEnum exchange, string pair, DateTime createDate)
+        public UserFees(decimal makerCommission, decimal takerCommission, Exchange exchange, string symbol, DateTime createDate)
         {
             MakerCommission = makerCommission;
             TakerCommission = takerCommission;
             Exchange = exchange;
-            Pair = pair;
+            Symbol = symbol;
             CreateDate = createDate;
         }
 

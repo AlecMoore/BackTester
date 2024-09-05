@@ -1,11 +1,12 @@
-﻿
+﻿using CryptoClients.Net.Enums;
+
 namespace BackTester.Models
 {
     public class KlineData : DataBaseObject
     {
         public KlineData(int id, decimal closePrice, DateTime closeTime, decimal highPrice, decimal lowPrice, 
             decimal openPrice, DateTime openTime, decimal quoteVolume, decimal takerBuyBaseVolume, 
-            decimal takerBuyQuoteVolume, int tradeCount, decimal volume, ExchangeEnum exchange, string pair, DateTime createDate)
+            decimal takerBuyQuoteVolume, int tradeCount, decimal volume, Exchange exchange, string symbol, DateTime createDate)
         {
             Id = id;
             ClosePrice = closePrice;
@@ -20,7 +21,7 @@ namespace BackTester.Models
             TradeCount = tradeCount;
             Volume = volume;
             Exchange = exchange;
-            Pair = pair;
+            Symbol = symbol;
             CreateDate = createDate;
         }
 

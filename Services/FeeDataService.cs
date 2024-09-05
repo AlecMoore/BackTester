@@ -1,50 +1,36 @@
-﻿using Binance.Net.Enums;
-using Binance.Net.Interfaces;
-using CryptoClients.Net.Interfaces;
-using System.Collections.Generic;
-using BackTester.Extensions;
-using BackTester.Interfaces;
-using BackTester.Models;
-using BackTester.Repositories;
-
+﻿using BackTester.Exchanges;
+using CryptoClients.Net.Enums;
 
 namespace BackTester.Services
 {
     public class FeeDataService
     {
-        private readonly IExchangeRestClient _exhangeRestClient;
+        private readonly Dictionary<Exchange, IExchangeRepository> _exchangeRepositories;
 
-        public FeeDataService(IExchangeRestClient exhangeRestClient)
+        public FeeDataService (Dictionary<Exchange, IExchangeRepository> exchangeRepositories)
         {
-            _exhangeRestClient = exhangeRestClient;
+            _exchangeRepositories = exchangeRepositories;
         }
 
         /// <summary>
         /// Gets fee values from api
         /// </summary>
-        /// <param name="pair"></param>
+        /// <param name="symbol"></param>
         /// <param name="exchange"></param>
         /// <returns></returns>
-        public async Task GetFeeDataAsync(string pair, string exchange)
+        public async Task GetFeeDataAsync(string symbol, IEnumerable<Exchange> exchanges)
         {
-            if (exchange == "Binance")
+            foreach (var exchange in exchanges)
             {
-                var binanceFees = _exhangeRestClient.Binance.SpotApi.Account.GetTradeFeeAsync(pair);
-                await Task.WhenAll(binanceFees);
-
-                if (binanceFees.Result.Success)
+                if (_exchangeRepositories.TryGetValue(exchange, out var repository))
                 {
-                    foreach (var fee in binanceFees.Result.Data)
-                    {
-                        var feeData = UserFees.FromBinanceInterface(fee, pair, exchange);
-                        Console.WriteLine(feeData.ToString());
-
-                    }
+                        var fees = await repository.GetUserFees(symbol);
+                        Console.WriteLine(fees.ToString());
                 }
                 else
                 {
-                    Console.WriteLine(binanceFees.Result.Error);
-                    return;
+                    // Handle case where the exchange is not found in the dictionary
+                    Console.WriteLine($"No repository found for {exchange}");
                 }
             }
         }

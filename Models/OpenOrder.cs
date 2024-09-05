@@ -1,10 +1,11 @@
-﻿
+﻿using CryptoClients.Net.Enums;
+
 namespace BackTester.Models
 {
     public class OpenOrder : DataBaseObject
     {
         public OpenOrder(decimal price, decimal quantity, decimal quantityFilled, string orderType,
-            string orderStatus, string orderSide, DateTime orderTime, ExchangeEnum exchange, string pair,
+            string orderStatus, string orderSide, DateTime orderTime, Exchange exchange, string symbol,
             DateTime createDate)
         {
             Price = price;
@@ -15,7 +16,7 @@ namespace BackTester.Models
             OrderSide = orderSide;
             OrderTime = orderTime;
             Exchange = exchange;
-            Pair = pair;
+            Symbol = symbol;
             CreateDate = createDate;
         }
 

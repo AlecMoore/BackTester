@@ -1,17 +1,13 @@
 ﻿using BackTester.Models;
+using CryptoClients.Net.Enums;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.Objects.Sockets;
-using CryptoExchange.Net.Sockets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BackTester.Exchanges
 {
     public interface IExchangeRepository
     {
+        Exchange GetExchange();
         Task<decimal> GetPrice(string symbol);
         Task<IEnumerable<OpenOrder>> GetOpenOrders();
         Task<Dictionary<string, decimal>> GetBalances();

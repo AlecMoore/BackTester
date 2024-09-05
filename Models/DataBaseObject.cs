@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CryptoClients.Net.Enums;
 
 namespace BackTester.Models
 {
     public class DataBaseObject
     {
-        public ExchangeEnum Exchange { get; set; } 
-        public string? Pair { get; set; }
+        public Exchange Exchange { get; set; } 
+        public string? Symbol { get; set; }
         public DateTime CreateDate { get; set; }
     }
 }

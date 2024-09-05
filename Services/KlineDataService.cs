@@ -1,70 +1,65 @@
-﻿using Binance.Net.Enums;
-using CryptoClients.Net.Interfaces;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using BackTester.Extensions;
+﻿using BackTester.Extensions;
 using BackTester.Interfaces;
-using BackTester.Models;
 using BackTester.Exchanges;
+using CryptoClients.Net.Enums;
 
 namespace BackTester.Services
 {
     public class KlineDataService
     {
         private readonly IKlineDataRepository _klineDataRepository;
-        private readonly IExchangeRestClient _exhangeRestClient;
-        private readonly IExchangeRepository _exchangeRepository;
+        private readonly Dictionary<Exchange, IExchangeRepository> _exchangeRepositories;
 
-        public KlineDataService(IKlineDataRepository klineDataRepository, IExchangeRestClient exhangeRestClient, IExchangeRepository exchangeRepository)
+        public KlineDataService(IKlineDataRepository klineDataRepository, Dictionary<Exchange, IExchangeRepository> exchangeRepositories)
         {
             _klineDataRepository = klineDataRepository;
-            _exhangeRestClient = exhangeRestClient;
-            _exchangeRepository = exchangeRepository;
+            _exchangeRepositories = exchangeRepositories;
         }
 
         /// <summary>
-        /// Adds kline data to the database from binance API.
+        /// Adds kline data to the database from exchange API.
         /// Binance API has a entry limit of 1000, so runs the call multiple times.
         /// </summary>
-        /// <param name="pair"></param>
+        /// <param name="symbol"></param>
         /// <param name="exchange"></param>
         /// <returns></returns>
-        public async Task SyncKlineDataAsync(string pair, IEnumerable<ExchangeEnum> exchanges)
+        public async Task SyncKlineDataAsync(string symbol, IEnumerable<Exchange> exchanges)
         {
-            int numberOfRuns = 20;
-            while(numberOfRuns > 0) { 
-                var databaseKlines = _klineDataRepository.GetKlineData(pair, exchange);
-
-                var timeRange = DetermineTimeRange(pair, exchange);
-
-                DateTime? startTime = timeRange.StartTime;
-                DateTime? endTime = timeRange.EndTime;
-
-                if (exchange == "Binance")
+            foreach (var exchange in exchanges)
+            {
+                if (_exchangeRepositories.TryGetValue(exchange, out var repository))
                 {
-                    var binanceKlines = _exhangeRestClient.Binance.SpotApi.ExchangeData.GetKlinesAsync(pair, KlineInterval.OneMinute, startTime, endTime, limit: 1000);
-                    await Task.WhenAll(binanceKlines);
-
-                    if (binanceKlines.Result.Success)
+                    int numberOfRuns = 20;
+                    while (numberOfRuns > 0)
                     {
-                        foreach (var kline in binanceKlines.Result.Data)
-                        {
-                            var klineData = new KlineData(0, kline.)
+                        var databaseKlines = _klineDataRepository.GetKlineData(symbol, exchange);
 
+                        var timeRange = DetermineTimeRange(symbol, exchange);
+
+                        DateTime? startTime = timeRange.StartTime;
+                        DateTime? endTime = timeRange.EndTime;
+
+                        var klines = await repository.GetKlineData(symbol, startTime, endTime);
+                        foreach(var kline in klines)
+                        {
                             //Checks kline is not already in db
-                            if (!databaseKlines.Any(k => k.CloseTime == klineData.CloseTime))
+                            if (!databaseKlines.Any(k => k.CloseTime == kline.CloseTime))
                             {
-                                _klineDataRepository.AddKlineData(klineData);
+                                _klineDataRepository.AddKlineData(kline);
+                            }
+                            else
+                            {
+                                Console.WriteLine(exchange.ToString() + symbol + kline.CloseTime + "Already exists in DB");
+                                return;
                             }
                         }
+                            numberOfRuns--;
                     }
-                    else
-                    {
-                        Console.WriteLine(binanceKlines.Result.Error);
-                        return;
-                    }
-
-                    numberOfRuns--;
+                }
+                else
+                {
+                    // Handle case where the exchange is not found in the dictionary
+                    Console.WriteLine($"No repository found for {exchange}");
                 }
             }
         }
@@ -73,12 +68,12 @@ namespace BackTester.Services
         /// Ensures the dates provided to the API will first be up to current date. 
         /// Then get as many entries as it can before the earliest entry.
         /// </summary>
-        /// <param name="pair"></param>
+        /// <param name="symbol"></param>
         /// <param name="exchange"></param>
         /// <returns></returns>
-        public (DateTime? StartTime, DateTime? EndTime) DetermineTimeRange(string pair, string exchange)
+        public (DateTime? StartTime, DateTime? EndTime) DetermineTimeRange(string symbol, Exchange exchange)
         {
-            var databaseKlines = _klineDataRepository.GetKlineData(pair, exchange);
+            var databaseKlines = _klineDataRepository.GetKlineData(symbol, exchange);
             DateTime? startTime = null;
             DateTime? endTime = null;
 

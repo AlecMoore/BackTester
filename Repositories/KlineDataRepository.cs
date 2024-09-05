@@ -1,12 +1,7 @@
-﻿using CryptoExchange.Net.CommonObjects;
-using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data.SqlClient;
 using BackTester.Interfaces;
 using BackTester.Models;
+using CryptoClients.Net.Enums;
 
 namespace BackTester.Repositories
 {
@@ -44,7 +39,7 @@ namespace BackTester.Repositories
                 command.Parameters.AddWithValue("@TakerBuyQuoteVolume", klineData.TakerBuyQuoteVolume);
                 command.Parameters.AddWithValue("@TradeCount", klineData.TradeCount);
                 command.Parameters.AddWithValue("@Volume", klineData.Volume);
-                command.Parameters.AddWithValue("@Pair", klineData.Pair);
+                command.Parameters.AddWithValue("@Pair", klineData.Symbol);
                 command.Parameters.AddWithValue("@Exchange", klineData.Exchange);
                 command.ExecuteNonQuery();
             }
@@ -56,7 +51,7 @@ namespace BackTester.Repositories
         /// <param name="Pair"></param>
         /// <param name="Exchange"></param>
         /// <returns></returns>
-        public IEnumerable<KlineData> GetKlineData(string Pair, string Exchange)
+        public IEnumerable<KlineData> GetKlineData(string Pair, Exchange Exchange)
         {
             var klines = new List<KlineData>();
             using (var connection = new SqlConnection(_connectionString))
@@ -73,7 +68,7 @@ namespace BackTester.Repositories
                         {
                             klines.Add(new KlineData(reader.GetInt32(0), reader.GetDecimal(1), reader.GetDateTime(2), reader.GetDecimal(3),
                                 reader.GetDecimal(4), reader.GetDecimal(5), reader.GetDateTime(6), reader.GetDecimal(7), reader.GetDecimal(8),
-                                reader.GetDecimal(9), reader.GetInt32(10), reader.GetDecimal(11), (ExchangeEnum)reader.GetInt32(13), 
+                                reader.GetDecimal(9), reader.GetInt32(10), reader.GetDecimal(11), (Exchange)reader.GetInt32(13), 
                                 reader.GetString(12), reader.GetDateTime(14)));
                         }
                     }
