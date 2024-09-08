@@ -22,6 +22,10 @@ var builder = Host.CreateDefaultBuilder(args)
             {
                 options.ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials("BinanceKey", "BinanceSecret");
             },
+            bitfinexRestOptions: (options) =>
+            {
+                options.ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials("BitfinexKey", "BitfinexSecret");
+            },
             bybitRestOptions: (options) =>
             {
                 options.ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials("BybitKey", "BybitSecret");
@@ -33,6 +37,10 @@ var builder = Host.CreateDefaultBuilder(args)
             return new ExchangeSocketClient(binanceSocketOptions: (options) =>
             {
                 options.ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials("BinanceKey", "BinanceSecret");
+            },
+            bitfinexSocketOptions: (options) =>
+            {
+                options.ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials("BitfinexKey", "BitfinexSecret");
             },
             bybitSocketOptions: (options) =>
             {
@@ -55,6 +63,13 @@ var builder = Host.CreateDefaultBuilder(args)
             return new BinanceExchangeRepository(restClient, socketClient);
         });
 
+        services.AddScoped<BitfinexExchangeRepository>(provider =>
+        {
+            var restClient = provider.GetRequiredService<IExchangeRestClient>().Bitfinex;
+            var socketClient = provider.GetRequiredService<IExchangeSocketClient>().Bitfinex;
+            return new BitfinexExchangeRepository(restClient, socketClient);
+        });
+
         services.AddScoped<BybitExchangeRepository>(provider =>
         {
             var restClient = provider.GetRequiredService<IExchangeRestClient>().Bybit;
@@ -68,6 +83,7 @@ var builder = Host.CreateDefaultBuilder(args)
             return new Dictionary<Exchange, IExchangeRepository>
             {
                 { Exchange.Binance, provider.GetRequiredService<BinanceExchangeRepository>() },
+                { Exchange.Bitfinex, provider.GetRequiredService<BitfinexExchangeRepository>() },
                 { Exchange.Bybit, provider.GetRequiredService<BybitExchangeRepository>() }
             };
         });
