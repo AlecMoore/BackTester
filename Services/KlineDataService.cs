@@ -40,26 +40,35 @@ namespace BackTester.Services
                         DateTime? endTime = timeRange.EndTime;
 
                         var klines = await repository.GetKlineData(symbol, startTime, endTime);
-                        foreach(var kline in klines)
+                        if (klines != null)
                         {
-                            //Checks kline is not already in db
-                            if (!databaseKlines.Any(k => k.CloseTime == kline.CloseTime))
+                            foreach (var kline in klines)
                             {
-                                _klineDataRepository.AddKlineData(kline);
+                                //Checks kline is not already in db
+                                if (!databaseKlines.Any(k => k.CloseTime == kline.CloseTime))
+                                {
+                                    _klineDataRepository.AddKlineData(kline);
+                                }
+                                else
+                                {
+                                    Console.WriteLine(exchange.ToString() + symbol + kline.CloseTime + "Already exists in DB");
+                                    return;
+                                }
                             }
-                            else
-                            {
-                                Console.WriteLine(exchange.ToString() + symbol + kline.CloseTime + "Already exists in DB");
-                                return;
-                            }
+
+                        } 
+                        else
+                        {
+                            Console.Error.WriteLine("No kline results returned");
                         }
-                            numberOfRuns--;
+                        
+                        numberOfRuns--;
                     }
                 }
                 else
                 {
                     // Handle case where the exchange is not found in the dictionary
-                    Console.WriteLine($"No repository found for {exchange}");
+                    Console.Error.WriteLine($"No repository found for {exchange}");
                 }
             }
         }

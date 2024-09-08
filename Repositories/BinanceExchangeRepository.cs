@@ -4,6 +4,7 @@ using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.Objects.Sockets;
 using BackTester.Exchanges;
 using CryptoClients.Net.Enums;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BackTester.Repositories
 {
@@ -27,29 +28,63 @@ namespace BackTester.Repositories
         public async Task<WebCallResult> CancelOrder(string symbol, string id)
         {
             var result = await _restClient.SpotApi.Trading.CancelOrderAsync(symbol, long.Parse(id));
-            return result.AsDataless();
+
+            if (result.Success && result.Data != null)
+            {
+                return result.AsDataless();
+            }
+            else
+            {
+                Console.Error.WriteLine(result.Error);
+                return null;
+            }
         }
 
         public async Task<Dictionary<string, decimal>> GetBalances()
         {
             var result = await _restClient.SpotApi.Account.GetAccountInfoAsync();
-            return result.Data.Balances.ToDictionary(b => b.Asset, b => b.Total);
+
+            if (result.Success && result.Data != null)
+            {
+                return result.Data.Balances.ToDictionary(b => b.Asset, b => b.Total);
+            }
+            else
+            {
+                Console.Error.WriteLine(result.Error);
+                return null;
+            }
         }
 
         public async Task<IEnumerable<OpenOrder>> GetOpenOrders()
         {
             var result = await _restClient.SpotApi.Trading.GetOpenOrdersAsync();
-            // Should check result success status here
-            return result.Data.Select(o => new OpenOrder(o.Price, o.Quantity, o.QuantityFilled, o.Type.ToString(),
-                o.Status.ToString(), o.Side.ToString(), o.CreateTime, Exchange.Binance, o.Symbol, DateTime.UtcNow)
-            );
+
+            if (result.Success && result.Data != null)
+            {
+                return result.Data.Select(o => new OpenOrder(o.Price, o.Quantity, o.QuantityFilled, o.Type.ToString(),
+                                o.Status.ToString(), o.Side.ToString(), o.CreateTime, Exchange.Binance, o.Symbol, DateTime.UtcNow)
+                            );
+            }
+            else
+            {
+                Console.Error.WriteLine(result.Error);
+                return null;
+            }
         }
 
         public async Task<decimal> GetPrice(string symbol)
         {
             var result = await _restClient.SpotApi.ExchangeData.GetPriceAsync(symbol);
-            // Should check result success status here
-            return result.Data.Price;
+
+            if (result.Success && result.Data != null)
+            {
+                return result.Data.Price;
+            }
+            else
+            {
+                Console.Error.WriteLine(result.Error);
+                return 0;
+            }
         }
 
         public async Task<WebCallResult<string>> PlaceOrder(string symbol, string side, string type, decimal quantity, decimal? price)
@@ -61,31 +96,63 @@ namespace BackTester.Repositories
                 quantity,
                 price: price,
                 timeInForce: type == "market" ? null : Binance.Net.Enums.TimeInForce.GoodTillCanceled);
-            return result.As(result.Data?.Id.ToString());
+
+            if (result.Success && result.Data != null)
+            {
+                return result.As(result.Data?.Id.ToString());
+            }
+            else
+            {
+                Console.Error.WriteLine(result.Error);
+                return null;
+            }
         }
 
         public async Task<UpdateSubscription> SubscribePrice(string symbol, Action<decimal> handler)
         {
-            var sub = await _socketClient.SpotApi.ExchangeData.SubscribeToMiniTickerUpdatesAsync(symbol, data => handler(data.Data.LastPrice));
-            return sub.Data;
+            var result = await _socketClient.SpotApi.ExchangeData.SubscribeToMiniTickerUpdatesAsync(symbol, data => handler(data.Data.LastPrice));
+
+            if (result.Success && result.Data != null)
+            {
+                return result.Data;
+            }
+            else
+            {
+                Console.Error.WriteLine(result.Error);
+                return null;
+            }
         }
 
         public async Task<IEnumerable<KlineData>> GetKlineData(string symbol, DateTime? startTime, DateTime? endTime)
         {
             var result = await _restClient.SpotApi.ExchangeData.GetKlinesAsync(symbol, Binance.Net.Enums.KlineInterval.OneMinute, startTime, endTime, limit: 1000);
-            // Should check result success status here
-            return result.Data.Select(r => new KlineData(0, r.ClosePrice, r.CloseTime, r.HighPrice, r.LowPrice,
-                r.OpenPrice, r.OpenTime, r.QuoteVolume, r.TakerBuyBaseVolume, r.TakerBuyQuoteVolume, r.TradeCount,
-                r.Volume, Exchange.Binance, symbol, DateTime.UtcNow)
-            );
+            if (result.Success && result.Data != null)
+            {
+                return result.Data.Select(r => new KlineData(0, r.ClosePrice, r.CloseTime, r.HighPrice, r.LowPrice,
+                                r.OpenPrice, r.OpenTime, r.QuoteVolume, r.TakerBuyBaseVolume, r.TakerBuyQuoteVolume, r.TradeCount,
+                                r.Volume, Exchange.Binance, symbol, DateTime.UtcNow)
+                            );
+            }
+            else
+            {
+                Console.Error.WriteLine(result.Error);
+                return null;
+            }
         }
 
         public async Task<UserFees> GetUserFees(string symbol)
         {
             var result = await _restClient.SpotApi.Account.GetTradeFeeAsync(symbol);
-            // Should check result success status here
 
-            return result.Data.Select(f => new UserFees(f.MakerFee, f.TakerFee, Exchange.Binance, symbol, DateTime.UtcNow)).FirstOrDefault();
+            if(result.Success && result.Data != null)
+            {
+                return result.Data.Select(f => new UserFees(f.MakerFee, f.TakerFee, Exchange.Binance, symbol, DateTime.UtcNow)).FirstOrDefault();
+            }
+            else
+            {
+                Console.Error.WriteLine(result.Error);
+                return null;
+            }
         }
     }
 }

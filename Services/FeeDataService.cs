@@ -25,7 +25,14 @@ namespace BackTester.Services
                 if (_exchangeRepositories.TryGetValue(exchange, out var repository))
                 {
                         var fees = await repository.GetUserFees(symbol);
+                        if(fees != null)
+                    {
                         Console.WriteLine(fees.ToString());
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("No fee results returned");
+                    }
                 }
                 else
                 {
