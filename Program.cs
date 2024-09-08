@@ -68,7 +68,7 @@ var builder = Host.CreateDefaultBuilder(args)
             return new Dictionary<Exchange, IExchangeRepository>
             {
                 { Exchange.Binance, provider.GetRequiredService<BinanceExchangeRepository>() },
-                { Exchange.Bybit, provider.GetRequiredService<BybitExchangeRepository>() }  // Make sure Bybit is registered
+                { Exchange.Bybit, provider.GetRequiredService<BybitExchangeRepository>() }
             };
         });
     })

@@ -23,9 +23,9 @@ namespace BackTester.Exchanges
             return Exchange.Bybit;
         }
 
-        public async Task<WebCallResult> CancelOrder(string symbol, string id)
+        public async Task<WebCallResult> CancelOrder(string id, string symbol)
         {
-            var result = await _restClient.V5Api.Trading.CancelOrderAsync(Bybit.Net.Enums.Category.Spot, symbol, id);
+            var result = await _restClient.V5Api.Trading.CancelOrderAsync(Bybit.Net.Enums.Category.Spot, symbol ?? "", id);
 
             if (result.Success && result.Data != null)
             {

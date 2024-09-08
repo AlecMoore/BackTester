@@ -1,4 +1,4 @@
-﻿using Binance.Net.Interfaces.Clients;
+﻿using Bitfinex.Net.Interfaces.Clients;
 using BackTester.Models;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.Objects.Sockets;
@@ -8,13 +8,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BackTester.Repositories
 {
-    internal class BinanceExchangeRepository : IExchangeRepository
+    internal class BitfinexExchangeRepository : IExchangeRepository
     {
-        private readonly IBinanceRestClient _restClient;
-        private readonly IBinanceSocketClient _socketClient;
+        private readonly IBitfinexRestClient _restClient;
+        private readonly IBitfinexSocketClient _socketClient;
 
 
-        public BinanceExchangeRepository(IBinanceRestClient restClient, IBinanceSocketClient socketClient)
+        public BitfinexExchangeRepository(IBitfinexRestClient restClient, IBitfinexSocketClient socketClient)
         {
             _restClient = restClient;
             _socketClient = socketClient;
@@ -22,12 +22,12 @@ namespace BackTester.Repositories
 
         public Exchange GetExchange()
         {
-            return Exchange.Binance;
+            return Exchange.Bitfinex;
         }
 
-        public async Task<WebCallResult> CancelOrder(string id, string symbol)
+        public async Task<WebCallResult> CancelOrder(string id, string? symbol = null)
         {
-            var result = await _restClient.SpotApi.Trading.CancelOrderAsync(symbol ?? "", long.Parse(id));
+            var result = await _restClient.SpotApi.Trading.CancelOrderAsync(long.Parse(id));
 
             if (result.Success && result.Data != null)
             {
@@ -42,11 +42,11 @@ namespace BackTester.Repositories
 
         public async Task<Dictionary<string, decimal>> GetBalances()
         {
-            var result = await _restClient.SpotApi.Account.GetAccountInfoAsync();
+            var result = await _restClient.SpotApi.Account.GetBalancesAsync();
 
             if (result.Success && result.Data != null)
             {
-                return result.Data.Balances.ToDictionary(b => b.Asset, b => b.Total);
+                return result.Data.ToDictionary(b => b.Asset, b => b.Total);
             }
             else
             {
@@ -61,8 +61,8 @@ namespace BackTester.Repositories
 
             if (result.Success && result.Data != null)
             {
-                return result.Data.Select(o => new OpenOrder(o.Price, o.Quantity, o.QuantityFilled, o.Type.ToString(),
-                                o.Status.ToString(), o.Side.ToString(), o.CreateTime, Exchange.Binance, o.Symbol, DateTime.UtcNow)
+                return result.Data.Select(o => new OpenOrder(o.Price, o.Quantity, o.Quantity - o.QuantityRemaining, o.Type.ToString(),
+                                o.Status.ToString(), o.Side.ToString(), o.CreateTime, Exchange.Bitfinex, o.Symbol, DateTime.UtcNow)
                             );
             }
             else
@@ -74,11 +74,11 @@ namespace BackTester.Repositories
 
         public async Task<decimal> GetPrice(string symbol)
         {
-            var result = await _restClient.SpotApi.ExchangeData.GetPriceAsync(symbol);
+            var result = await _restClient.SpotApi.ExchangeData.GetTickerAsync(symbol);
 
             if (result.Success && result.Data != null)
             {
-                return result.Data.Price;
+                return result.Data.LastPrice;
             }
             else
             {
@@ -91,11 +91,10 @@ namespace BackTester.Repositories
         {
             var result = await _restClient.SpotApi.Trading.PlaceOrderAsync(
                 symbol,
-                side.ToLower() == "buy" ? Binance.Net.Enums.OrderSide.Buy : Binance.Net.Enums.OrderSide.Sell,
-                type == "market" ? Binance.Net.Enums.SpotOrderType.Market : Binance.Net.Enums.SpotOrderType.Limit,
+                side.ToLower() == "buy" ? Bitfinex.Net.Enums.OrderSide.Buy : Bitfinex.Net.Enums.OrderSide.Sell,
+                type == "market" ? Bitfinex.Net.Enums.OrderType.Market : Bitfinex.Net.Enums.OrderType.Limit,
                 quantity,
-                price: price,
-                timeInForce: type == "market" ? null : Binance.Net.Enums.TimeInForce.GoodTillCanceled);
+                price: price ?? 0);
 
             if (result.Success && result.Data != null)
             {
@@ -110,7 +109,7 @@ namespace BackTester.Repositories
 
         public async Task<UpdateSubscription> SubscribePrice(string symbol, Action<decimal> handler)
         {
-            var result = await _socketClient.SpotApi.ExchangeData.SubscribeToMiniTickerUpdatesAsync(symbol, data => handler(data.Data.LastPrice));
+            var result = await _socketClient.SpotApi.SubscribeToTickerUpdatesAsync(symbol, data => handler(data.Data.LastPrice));
 
             if (result.Success && result.Data != null)
             {
@@ -125,12 +124,12 @@ namespace BackTester.Repositories
 
         public async Task<IEnumerable<KlineData>> GetKlineData(string symbol, DateTime? startTime, DateTime? endTime)
         {
-            var result = await _restClient.SpotApi.ExchangeData.GetKlinesAsync(symbol, Binance.Net.Enums.KlineInterval.OneMinute, startTime, endTime, limit: 1000);
+            var result = await _restClient.SpotApi.ExchangeData.GetKlinesAsync(symbol, Bitfinex.Net.Enums.KlineInterval.OneMinute, limit: 10000, startTime: startTime, endTime: endTime);
             if (result.Success && result.Data != null)
             {
-                return result.Data.Select(r => new KlineData(0, r.ClosePrice, r.CloseTime, r.HighPrice, r.LowPrice,
-                                r.OpenPrice, r.OpenTime, r.QuoteVolume, r.TakerBuyBaseVolume, r.TakerBuyQuoteVolume, r.TradeCount,
-                                r.Volume, Exchange.Binance, symbol, DateTime.UtcNow)
+                return result.Data.Select(r => new KlineData(0, r.ClosePrice, r.OpenTime.AddMinutes(1), r.HighPrice, r.LowPrice,
+                                r.OpenPrice, r.OpenTime, 0, 0, 0, 0,
+                                r.Volume, Exchange.Bitfinex, symbol, DateTime.UtcNow)
                             );
             }
             else
@@ -142,11 +141,11 @@ namespace BackTester.Repositories
 
         public async Task<UserFees> GetUserFees(string symbol)
         {
-            var result = await _restClient.SpotApi.Account.GetTradeFeeAsync(symbol);
+            var result = await _restClient.SpotApi.Account.Get30DaySummaryAndFeesAsync();
 
             if(result.Success && result.Data != null)
             {
-                return result.Data.Select(f => new UserFees(f.MakerFee, f.TakerFee, Exchange.Binance, symbol, DateTime.UtcNow)).FirstOrDefault();
+                return new UserFees(result.Data.Fees.MakerFees.MakerFee, result.Data.Fees.TakerFees.TakerFeeFiat, Exchange.Bitfinex, symbol, DateTime.UtcNow);
             }
             else
             {
