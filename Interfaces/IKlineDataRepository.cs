@@ -6,6 +6,6 @@ namespace BackTester.Interfaces
     public interface IKlineDataRepository
     {
         void AddKlineData(KlineData klineData);
-        IEnumerable<KlineData> GetKlineData(string Pair, Exchange Exchange);
+        IEnumerable<KlineData> GetKlineData(string Symbol, Exchange Exchange);
     }
 }

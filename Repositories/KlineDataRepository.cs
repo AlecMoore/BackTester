@@ -2,6 +2,7 @@
 using BackTester.Interfaces;
 using BackTester.Models;
 using CryptoClients.Net.Enums;
+using CryptoExchange.Net.CommonObjects;
 
 namespace BackTester.Repositories
 {
@@ -39,7 +40,7 @@ namespace BackTester.Repositories
                 command.Parameters.AddWithValue("@TakerBuyQuoteVolume", klineData.TakerBuyQuoteVolume);
                 command.Parameters.AddWithValue("@TradeCount", klineData.TradeCount);
                 command.Parameters.AddWithValue("@Volume", klineData.Volume);
-                command.Parameters.AddWithValue("@Pair", klineData.Symbol);
+                command.Parameters.AddWithValue("@Symbol", klineData.Symbol);
                 command.Parameters.AddWithValue("@Exchange", klineData.Exchange);
                 command.ExecuteNonQuery();
             }
@@ -51,16 +52,16 @@ namespace BackTester.Repositories
         /// <param name="Pair"></param>
         /// <param name="Exchange"></param>
         /// <returns></returns>
-        public IEnumerable<KlineData> GetKlineData(string Pair, Exchange Exchange)
+        public IEnumerable<KlineData> GetKlineData(string Symbol, Exchange Exchange)
         {
             var klines = new List<KlineData>();
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using (var command = new SqlCommand("SELECT * FROM KlineData WHERE Pair = @Pair AND Exchange = @Exchange", connection))
+                using (var command = new SqlCommand("SELECT * FROM KlineData WHERE Symbol = @Symbol AND Exchange = @Exchange", connection))
                 {
-                    command.Parameters.AddWithValue("@Pair", Pair);
-                    command.Parameters.AddWithValue("@Exchange", Exchange);
+                    command.Parameters.AddWithValue("@Symbol", Symbol);
+                    command.Parameters.AddWithValue("@Exchange", (int)Exchange);
 
                     using (var reader = command.ExecuteReader())
                     {
