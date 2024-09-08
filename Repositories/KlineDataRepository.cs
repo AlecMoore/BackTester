@@ -26,8 +26,8 @@ namespace BackTester.Repositories
                 connection.Open();
                 var command = new SqlCommand("INSERT INTO KlineData (ClosePrice, CloseTime, HighPrice, " +
                     "LowPrice, OpenPrice, OpenTime, QuoteVolume, TakerBuyBaseVolume, TakerBuyQuoteVolume, TradeCount, " +
-                    "Volume, Pair, Exchange) VALUES (@ClosePrice, @CloseTime, @HighPrice, @LowPrice, @OpenPrice, @OpenTime, " +
-                    "@QuoteVolume, @TakerBuyBaseVolume, @TakerBuyQuoteVolume, @TradeCount, @Volume, @Pair, @Exchange)",
+                    "Volume, Symbol, Exchange) VALUES (@ClosePrice, @CloseTime, @HighPrice, @LowPrice, @OpenPrice, @OpenTime, " +
+                    "@QuoteVolume, @TakerBuyBaseVolume, @TakerBuyQuoteVolume, @TradeCount, @Volume, @Symbol, @Exchange)",
                     connection);
                 command.Parameters.AddWithValue("@ClosePrice", klineData.ClosePrice);
                 command.Parameters.AddWithValue("@CloseTime", klineData.CloseTime);;

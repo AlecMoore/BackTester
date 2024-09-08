@@ -100,4 +100,4 @@ IEnumerable<Exchange> exchanges = new List<Exchange>() { Exchange.Binance };
 // Add ETH Klines to DB
 await klineService.SyncKlineDataAsync("ETHUSDT", exchanges);
 
-await feeService.GetFeeDataAsync("ETHUSDT", exchanges);
+//await feeService.GetFeeDataAsync("ETHUSDT", exchanges);
