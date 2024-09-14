@@ -4,10 +4,11 @@ namespace BackTester.Models
 {
     public class OpenOrder : DataBaseObject
     {
-        public OpenOrder(decimal price, decimal quantity, decimal quantityFilled, string orderType,
+        public OpenOrder(string id, decimal price, decimal quantity, decimal quantityFilled, string orderType,
             string orderStatus, string orderSide, DateTime orderTime, Exchange exchange, string symbol,
             DateTime createDate)
         {
+            Id = id;
             Price = price;
             Quantity = quantity;
             QuantityFilled = quantityFilled;
@@ -20,6 +21,7 @@ namespace BackTester.Models
             CreateDate = createDate;
         }
 
+        public string Id { get; set; }
         public decimal Price { get; set; }
         public decimal Quantity { get; set; }
         public decimal QuantityFilled { get; set; }

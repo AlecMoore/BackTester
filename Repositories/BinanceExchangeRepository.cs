@@ -61,7 +61,7 @@ namespace BackTester.Repositories
 
             if (result.Success && result.Data != null)
             {
-                return result.Data.Select(o => new OpenOrder(o.Price, o.Quantity, o.QuantityFilled, o.Type.ToString(),
+                return result.Data.Select(o => new OpenOrder(o.Id.ToString(), o.Price, o.Quantity, o.QuantityFilled, o.Type.ToString(),
                                 o.Status.ToString(), o.Side.ToString(), o.CreateTime, Exchange.Binance, o.Symbol, DateTime.UtcNow)
                             );
             }
@@ -87,7 +87,7 @@ namespace BackTester.Repositories
             }
         }
 
-        public async Task<WebCallResult<string>> PlaceOrder(string symbol, string side, string type, decimal quantity, decimal? price)
+        public async Task<OpenOrder> PlaceOrder(string symbol, string side, string type, decimal quantity, decimal? price)
         {
             var result = await _restClient.SpotApi.Trading.PlaceOrderAsync(
                 symbol,
@@ -99,7 +99,8 @@ namespace BackTester.Repositories
 
             if (result.Success && result.Data != null)
             {
-                return result.As(result.Data?.Id.ToString());
+                return new OpenOrder(result.Data.Id.ToString(), result.Data.Price, result.Data.Quantity, result.Data.QuantityFilled, result.Data.Type.ToString(),
+                                result.Data.Status.ToString(), result.Data.Side.ToString(), result.Data.CreateTime, Exchange.Binance, result.Data.Symbol, DateTime.UtcNow);
             }
             else
             {

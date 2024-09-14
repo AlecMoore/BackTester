@@ -59,7 +59,7 @@ namespace BackTester.Exchanges
 
             if (result.Success && result.Data != null)
             {
-                return result.Data.List.Select(o => new OpenOrder(o.Price ?? 0, o.Quantity, o.QuantityFilled ?? 0, o.OrderType.ToString(),
+                return result.Data.List.Select(o => new OpenOrder(o.OrderId, o.Price ?? 0, o.Quantity, o.QuantityFilled ?? 0, o.OrderType.ToString(),
                                 o.Status.ToString(), o.Side.ToString(), o.CreateTime, Exchange.Bybit, o.Symbol, DateTime.UtcNow)
                             );
             }
@@ -85,7 +85,7 @@ namespace BackTester.Exchanges
             }
         }
 
-        public async Task<WebCallResult<string>> PlaceOrder(string symbol, string side, string type, decimal quantity, decimal? price)
+        public async Task<OpenOrder> PlaceOrder(string symbol, string side, string type, decimal quantity, decimal? price)
         {
             var result = await _restClient.V5Api.Trading.PlaceOrderAsync(
                 Bybit.Net.Enums.Category.Spot,
@@ -97,7 +97,9 @@ namespace BackTester.Exchanges
 
             if (result.Success && result.Data != null)
             {
-                return result.As(result.Data?.OrderId.ToString());
+                var order = (await GetOpenOrders()).First(o => o.Id == result.Data.OrderId);
+
+                return (await GetOpenOrders()).First(o => o.Id == result.Data.OrderId);
             }
             else
             {
@@ -123,12 +125,12 @@ namespace BackTester.Exchanges
 
         public async Task<IEnumerable<KlineData>> GetKlineData(string symbol, DateTime? startTime, DateTime? endTime)
         {
-            return null;
+            throw new NotImplementedException();
         }
 
         public async Task<UserFees> GetUserFees(string symbol)
         {
-            return null;
+            throw new NotImplementedException();
         }
     }
 }
