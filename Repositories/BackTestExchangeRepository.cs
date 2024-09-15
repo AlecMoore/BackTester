@@ -37,7 +37,8 @@ namespace BackTester.Repositories
 
         public async Task<OpenOrder> PlaceOrder(string symbol, string side, string type, decimal quantity, decimal? price)
         {
-            throw new NotImplementedException();
+            return new OpenOrder("", price ?? 0, quantity, quantity, type.ToString(),
+                            "", side.ToString(), DateTime.UtcNow, Exchange.Binance, symbol, DateTime.UtcNow);
         }
 
         public async Task<UpdateSubscription> SubscribePrice(string symbol, Action<decimal> handler)

@@ -10,7 +10,7 @@ namespace BackTester.Interfaces
 {
     public interface IBacktestService
     {
-        BacktestResult RunBacktest(Exchange Exchange, ITradingStrategy strategy, string Symbol, DateTime startDate, DateTime endDate);
+        Task<BacktestResult> RunBacktest(Exchange Exchange, ITradingStrategy strategy, string Symbol, DateTime startDate, DateTime endDate);
     }
 
 }

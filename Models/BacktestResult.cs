@@ -10,7 +10,7 @@ namespace BackTester.Models
     {
         public decimal TotalProfit { get; set; }
         public decimal NetProfit { get; set; }
-        public List<TradeResult> Trades { get; set; } = new List<TradeResult>();
+        public List<OpenOrder> Trades { get; set; } = new List<OpenOrder>();
     }
 
 }
